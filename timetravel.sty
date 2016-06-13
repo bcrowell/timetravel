@@ -36,7 +36,11 @@
 ]
 
 \AtBeginDocument{
-  \input{timetravel/pass.tex}
-  % Sets the macro \timetravelpass to an integer.
-  % This filename is also set in timetravel.rb.
+  \IfFileExists{timetravel/pass.tex}{%
+    \input{timetravel/pass.tex}
+    % Sets the macro \timetravelpass to an integer.
+    % This filename is also set in timetravel.rb.
+  }{%
+    \PackageError{timetravel}{File timetravel/pass.tex does not exist. Did you run the timetravel.rb script before compiling?}{}
+  }
 }

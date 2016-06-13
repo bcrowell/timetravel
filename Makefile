@@ -12,3 +12,6 @@ default:
 clean:
 	rm -f *.aux
 	rm -Rf timetravel
+
+doc:
+	markdown README.md >README.html
