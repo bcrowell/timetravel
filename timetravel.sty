@@ -4,16 +4,20 @@
 \newcounter{timetravelctr}% labels each use of the timetravel environment
 
 \newcommand{\inputifitexists}[1]{\IfFileExists{#1.tex}{\input{#1}}{}}
-\newcommand{\kirk}{\inputifitexists{timetravel/par\thetimetravelparctr}}
-\newcommand{\spock}{\ifdim\emergencystretch>0pt{}\kirk\fi}
-% Use \ifdim\emergencystretch>0pt to attempt to detect whether we're in outer paragraph
-% mode. This won't always work, and in fact doesn't actually seem to work.
-% http://comp.text.tex.narkive.com/ttqVg20H/test-for-outer-par-mode
+\newcommand{\timetravelkirk}{\inputifitexists{timetravel/par\thetimetravelparctr}}
+\newcommand{\timetravelspock}{\ifdim\emergencystretch>0pt{}\timetravelkirk\fi}
+% ...Use \ifdim\emergencystretch>0pt to attempt to detect whether we're in outer paragraph
+%    mode. I'm not sure if this works or not.
+%    http://comp.text.tex.narkive.com/ttqVg20H/test-for-outer-par-mode
+\newcommand{\timetraveltohere}{%
+  \stepcounter{timetravelparctr}\label{timetravelpar\thetimetravelparctr}%
+  \ifnum\timetravelpass>1\timetravelspock\fi%
+}
+% ... Use this command to mark a place at which it would be OK to insert a time-traveling float.
+%     We don't want to do this unless we're in outer paragraph mode.
 
-\PushPreHook{par}{\stepcounter{timetravelparctr}\label{timetravelpar\thetimetravelparctr}}
-\newcommand{\timetravelenable}{\PushPreHook{par}{\ifnum\timetravelpass>1\spock\fi}}
+\newcommand{\timetravelenable}{\PushPreHook{par}{\timetraveltohere}}
 \newcommand{\timetraveldisable}{\PopPreHook{par}}
-\timetravelenable
 
 % NewEnviron is provided by package environ. Allows access to \BODY.
 \NewEnviron{timetravel}{%

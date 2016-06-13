@@ -1,7 +1,6 @@
 *~
 *.aux
 *.log
-*.tex
 *.pdf
 *.json
 timetravel/*

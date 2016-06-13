@@ -1,13 +1,13 @@
 default:
 	make clean
-	timetravel.rb a.tex
-	pdflatex a
-	timetravel.rb a.tex
-	pdflatex a
-	timetravel.rb a.tex
-	pdflatex a
-	timetravel.rb a.tex
-	pdflatex a
+	timetravel.rb sample.tex
+	pdflatex sample
+	timetravel.rb sample.tex
+	pdflatex sample
+	timetravel.rb sample.tex
+	pdflatex sample
+	timetravel.rb sample.tex
+	pdflatex sample
 
 clean:
 	rm -f *.aux

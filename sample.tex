@@ -1,0 +1,20 @@
+\documentclass[twocolumn]{article}
+
+\usepackage{timetravel}
+\usepackage{lipsum}
+
+\begin{document}
+
+\timetravelenable
+
+\lipsum[1-13]
+
+\begin{timetravel}
+\begin{table*}
+  \begin{tabular}{p{30mm}p{30mm}p{30mm}p{30mm}}
+    John & Paul & George & Ringo
+  \end{tabular}
+\end{table*}
+\end{timetravel}
+
+\end{document}
