@@ -17,9 +17,13 @@
 
 % NewEnviron is provided by package environ. Allows access to \BODY.
 \NewEnviron{timetravel}{%
-  \stepcounter{timetravelctr}\label{timetravel\thetimetravelctr}%
+  \timetraveldisable
+  \stepcounter{timetravelctr}\label{timetravelinvoked\thetimetravelctr}%
   \BODY
-}
+}%
+[%
+  \timetravelenable
+]
 
 \inputifitexists{timetravel/pass.tex} 
   % Sets the macro \timetravelpass to an integer.

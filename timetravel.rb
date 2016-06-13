@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 
-# usage: timetravel.rb foo.tex bar.tex
-# Reads foo.tex, writes the preprocessed version to bar.tex.
+# usage: timetravel.rb foo.tex
 
 require 'fileutils'
 require 'digest'
@@ -14,11 +13,9 @@ $freeze_at_pass = 3
 def main()
   debug = false
   in_file = ARGV[0]
-  out_file = ARGV[1]
   if in_file.nil? then fatal_error("no input file specified") end
-  if out_file.nil? then fatal_error("no output file specified") end
   if !(File.exist?(in_file)) then fatal_error("input file #{in_file} does not exist") end
-  aux_file = File.basename(out_file, ".tex") + ".aux"
+  aux_file = File.basename(in_file, ".tex") + ".aux"
   $temp_dir = "timetravel" # subdirectory of current working directory
 
   $pass_file = "#{$temp_dir}/pass.tex" # This filename is also set in timetravel.sty.
@@ -49,43 +46,42 @@ def main()
       $aux_invoked,$aux_par = remember_page_numbers()
     end
   end
-  File.open(out_file,'w') { |f_out|
-    inside = false # are we currently inside or outside of a % begin-timetravel ... % end-timetravel block?
-    line_num = 0
-    code = '' # if inside a block, start accumulating a copy of the code here
-    File.readlines(in_file).each { |line|
-      line_num = line_num+1
-      if line=~/\s*%\s*begin-timetravel/ then
-        if inside then fatal_error("begin-timetravel twice in a row at line #{line_num}") end
-        inside = true
-        code = "\\timetraveldisable" # Don't place a hook inside the floating content itself.
+  inside = false # are we currently inside a timetravel environment?
+  line_num = 0
+  code = '' # if inside a block, start accumulating a copy of the code here
+  key = 0 # bug: won't work for multiple source files in same document
+  File.readlines(in_file).each { |line|
+    line_num = line_num+1
+    line_type = 'normal'
+    if line=~/\s*\\(begin|end){timetravel}/ then line_type=$1 end
+    if line_type=='begin' then
+      if inside then fatal_error("\\begin{timetravel} twice in a row at line #{line_num}") end
+      inside = true
+    end
+    if inside && line_type=='normal' then code = code+line end
+    if line_type=='end' then
+      if !inside then fatal_error("\\end{timetravel} occurs when not inside a timetravel block at line #{line_num}") end
+      inside = false
+      #key = Digest::MD5.hexdigest(code)
+      key = key+1 # bug: won't work for multiple source files in same document
+      #$stderr.print "hash=#{key}, code=#{code}=\n"
+      if pass==1 then
+        code_file = "#{$temp_dir}/#{key}.tex"
+        File.open(code_file,'w') { |code_f| code_f.print "\\timetraveldisable#{code}\\timetravelenable" }
       end
-      if inside then code = code+line end
-      if line=~/\s*%\s*end-timetravel/ then
-        if !inside then fatal_error("end-timetravel occurs when not inside a timetravel block at line #{line_num}") end
-        inside = false
-        key = Digest::MD5.hexdigest(code)
-        #$stderr.print "hash=#{key}, code=#{code}=\n"
-        if pass==1 then
-          code_file = "#{$temp_dir}/#{key}.tex"
-          File.open(code_file,'w') { |code_f| code_f.print code+"\n\\timetravelenable" }
+      if pass>=2 then
+        if !$aux_invoked.key?(key.to_s) then fatal_error("aux file #{aux_file} doesn't contain key #{key}") end
+        page = $aux_invoked[key.to_s]
+        if page>1 then page=page-1 end
+        if pass==2 then
+          par = $aux_par[page]
+          File.open("#{$temp_dir}/par#{par}.tex",'a') { |f_par| f_par.print "\\input{timetravel/#{key}}"}
         end
-        if pass>=2 then
-          if !$aux_invoked.key?(key) then fatal_error("aux file #{aux_file} doesn't contain key #{key}") end
-          page = $aux_invoked[key]
-          if page>1 then page=page-1 end
-          if pass==2 then
-            par = $aux_par[page]
-            File.open("#{$temp_dir}/par#{par}.tex",'a') { |f_page| f_page.print "\\input{timetravel/#{key}}"}
-          end
-        end
-        f_out.print "\\label{timetravelinvoked#{key}}" # This will be immediately followed by the % end-timetravel.
       end
-      if pass<2 || !inside then f_out.print line end
-           # If pass is 2 or greater, don't duplicate the content of the block.
-    }
-    if inside then fatal_error("begin-timetravel ended at end of file") end
+      %%%%% f_out.print "\\label{timetravelinvoked#{key}}" # This will be immediately followed by the % end-timetravel.
+    end
   }
+  if inside then fatal_error("\\end{timetravel} ended at end of file") end
 end
 
 def save_page_numbers
@@ -106,7 +102,7 @@ end
 
 # Initializes $aux_invoked and $aux_par.
 # Lines in aux file look like this: 
-#   \newlabel{timetravelinvoked226d375a2efab58c0ff60b659a2b5e70}{{}{2}}
+#   \newlabel{timetravelinvoked1}{{}{2}}
 #   \newlabel{timetravelpar14}{{}{2}}
 def get_page_numbers_from_aux_file(aux_file)
   $aux_invoked = {} # key=hash, value=page
