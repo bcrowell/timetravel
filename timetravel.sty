@@ -1,0 +1,26 @@
+\RequirePackage{everyhook,environ}
+
+\newcounter{timetravelparctr}% a counter that labels each paragraph in the document sequentially
+\newcounter{timetravelctr}% labels each use of the timetravel environment
+
+\newcommand{\inputifitexists}[1]{\IfFileExists{#1.tex}{\input{#1}}{}}
+\newcommand{\kirk}{\inputifitexists{timetravel/par\thetimetravelparctr}}
+\newcommand{\spock}{\ifdim\emergencystretch>0pt{}\kirk\fi}
+% Use \ifdim\emergencystretch>0pt to attempt to detect whether we're in outer paragraph
+% mode. This won't always work, and in fact doesn't actually seem to work.
+% http://comp.text.tex.narkive.com/ttqVg20H/test-for-outer-par-mode
+
+\PushPreHook{par}{\stepcounter{timetravelparctr}\label{timetravelpar\thetimetravelparctr}}
+\newcommand{\timetravelenable}{\PushPreHook{par}{\spock}}
+\newcommand{\timetraveldisable}{\PopPreHook{par}}
+\timetravelenable
+
+% NewEnviron is provided by package environ. Allows access to \BODY.
+\NewEnviron{timetravel}{%
+  \stepcounter{timetravelctr}\label{timetravel\thetimetravelctr}%
+  \BODY
+}
+
+\inputifitexists{timetravel/pass.tex} 
+  % Sets the macro \timetravelpass to an integer.
+  % This filename is also set in timetravel.rb.
