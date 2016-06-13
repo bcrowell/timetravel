@@ -33,7 +33,7 @@ def main()
     FileUtils.rm_rf $temp_dir
     Dir.mkdir($temp_dir)
   end
-  File.open($pass_file,'w') { |f|  f.print "\newcommand{\timetravelpass}{#{pass}}\n"}
+  File.open($pass_file,'w') { |f|  f.print "\\newcommand{\\timetravelpass}{#{pass}}\n"}
   if debug then $stderr.print "pass=#{pass}\n" end
 
   page_numbers = {}

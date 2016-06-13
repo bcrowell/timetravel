@@ -11,7 +11,7 @@
 % http://comp.text.tex.narkive.com/ttqVg20H/test-for-outer-par-mode
 
 \PushPreHook{par}{\stepcounter{timetravelparctr}\label{timetravelpar\thetimetravelparctr}}
-\newcommand{\timetravelenable}{\PushPreHook{par}{\spock}}
+\newcommand{\timetravelenable}{\PushPreHook{par}{\ifnum\timetravelpass>1\spock\fi}}
 \newcommand{\timetraveldisable}{\PopPreHook{par}}
 \timetravelenable
 
@@ -19,12 +19,14 @@
 \NewEnviron{timetravel}{%
   \timetraveldisable
   \stepcounter{timetravelctr}\label{timetravelinvoked\thetimetravelctr}%
-  \BODY
+  \ifnum\timetravelpass=1\BODY\fi
 }%
 [%
   \timetravelenable
 ]
 
-\inputifitexists{timetravel/pass.tex} 
+\AtBeginDocument{
+  \input{timetravel/pass.tex}
   % Sets the macro \timetravelpass to an integer.
   % This filename is also set in timetravel.rb.
+}
