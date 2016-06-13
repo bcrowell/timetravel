@@ -16,8 +16,14 @@
 % ... Use this command to mark a place at which it would be OK to insert a time-traveling float.
 %     We don't want to do this unless we're in outer paragraph mode.
 
-\newcommand{\timetravelenable}{\PushPreHook{par}{\timetraveltohere}}
-\newcommand{\timetraveldisable}{\PopPreHook{par}}
+\newcommand{\timetravelenable}{}
+\newcommand{\timetraveldisable}{}
+\DeclareOption{auto}{ % attempt automatic placement at any paragraph break
+  \renewcommand{\timetravelenable}{\PushPreHook{par}{\timetraveltohere}}
+  \renewcommand{\timetraveldisable}{\PopPreHook{par}}
+}
+
+\ProcessOptions\relax
 
 % NewEnviron is provided by package environ. Allows access to \BODY.
 \NewEnviron{timetravel}{%

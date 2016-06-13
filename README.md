@@ -12,7 +12,7 @@ Before each compilation of the document, a separate ruby script must be run, lik
 
 The tex file should contain code like this:
 
-    \usepackage{timetravel}
+    \usepackage[auto]{timetravel}
       ...
       ... % Floats will not land here.
       ...
@@ -28,6 +28,9 @@ time to the page before the one on which it was invoked in the source
 code. In the application of interest, this should cause the float to
 be typeset on the same page as the one on which it was invoked.
 
+To start compilation from scratch, delete the subdirectory, named
+timetravel, that is automatically created by the script.
+
 Because the ruby script has to be able to parse the tex file, the
 begin and end statements for each timetravel environment must be the
 first things other than whitespace to occur on their lines. 
@@ -37,6 +40,22 @@ the float lands on the intended page. Over the first few compilations,
 the float may jump around. It should normally converge to a definite
 result after compiling the document three times. Compiling a fourth or
 subsequent times should not cause floats to move to different pages.
+
+The auto option causes every paragraph break after \timetravelenable
+to be a possible place for the time-traveling material to arrive.
+This option may be unreliable, because it's an error if the material
+arrives somwehere that's not in outer paragraph mode. The package
+attempts to detect this, but detection may not be reliable. It may be
+safer to turn off the auto option. In this case, time-traveling
+material can only arrive at locations that are explicitly marked with
+the macro \timetraveltohere. For example:
+
+    \usepackage{timetravel}
+    I shot an arrow into the air.\timetraveltohere
+    It fell to earth, I knew not where.
+    \begin{timetravel}
+      ... % code for a floating environment
+    \end{timetravel}
 
 Bugs:
 
