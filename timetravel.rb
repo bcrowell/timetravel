@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 # usage: timetravel.rb foo.tex
+# usage: timetravel.rb foo.tex pass
 
 require 'fileutils'
 require 'digest'
@@ -19,20 +20,31 @@ def main()
   $temp_dir = "timetravel" # subdirectory of current working directory
 
   $pass_file = "#{$temp_dir}/pass.tex" # This filename is also set in timetravel.sty.
-    # ...keep track of which pass we're on.
+    # ...Keep track of which pass we're on.
     # This file consists of a single line that looks like this: \newcommand{\timetravelpass}{7}
-    # The rube code reads it and extracts the integer. The latex package also inputs this file.
+    # The ruby code reads it and extracts the integer. The latex package also inputs this file.
+  $count_file = "#{$temp_dir}/count"
+    # ...Keep track of how many timetravel environments we've done, even if there are multiple input files.
   pass = 1
+  old_pass = 0
   if File.exist?(aux_file) then
     if !(File.directory?($temp_dir)) then fatal_error("#{aux_file} exists, but directory #{$temp_dir} doesn't") end
     slurp_or_die($pass_file) =~ /(\d+)/
-    pass = $1.to_i
-    pass = pass+1
+    old_pass = $1.to_i
+  end
+  reset_count = false
+  if !(ARGV[1].nil?) then
+    pass = ARGV[1].to_i
+    if pass>old_pass then reset_count=true end
+  else
+    pass = old_pass+1
+    reset_count = true
   end
   if pass==1 then # make a clean temporary directory
     FileUtils.rm_rf $temp_dir
     Dir.mkdir($temp_dir)
   end
+  if reset_count then set_count(0) end
   File.open($pass_file,'w') { |f|  f.print "\\newcommand{\\timetravelpass}{#{pass}}\n"}
   if debug then $stderr.print "pass=#{pass}\n" end
 
@@ -49,7 +61,7 @@ def main()
   inside = false # are we currently inside a timetravel environment?
   line_num = 0
   code = '' # if inside a block, start accumulating a copy of the code here
-  key = 0 # bug: won't work for multiple source files in same document
+  key = get_count()
   File.readlines(in_file).each { |line|
     line_num = line_num+1
     line_type = 'normal'
@@ -63,7 +75,8 @@ def main()
       if !inside then fatal_error("\\end{timetravel} occurs when not inside a timetravel block at line #{line_num}") end
       inside = false
       #key = Digest::MD5.hexdigest(code)
-      key = key+1 # bug: won't work for multiple source files in same document
+      key = key+1
+      set_count(key)
       #$stderr.print "hash=#{key}, code=#{code}=\n"
       if pass==1 then
         code_file = "#{$temp_dir}/#{key}.tex"
@@ -82,6 +95,18 @@ def main()
     end
   }
   if inside then fatal_error("\\end{timetravel} ended at end of file") end
+end
+
+def set_count(n)
+  File.open($count_file,'w') { |f|  f.print n}
+end
+
+def get_count
+  if File.exist?($count_file) then
+    slurp_or_die($count_file).to_i
+  else
+    return 0
+  end
 end
 
 def save_page_numbers
