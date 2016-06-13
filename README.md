@@ -61,12 +61,14 @@ If the latex document is built from multiple input files, then the
 ruby script isn't smart enough to count how many compilation passes
 have been made, and you have to tell it by hand, like this:
 
-  timetravel.rb book.tex 1
-  timetravel.rb ch1.tex 1
-  timetravel.rb ch2.tex 1
-  pdflatex book
-  timetravel.rb book.tex 2
-  timetravel.rb ch1.tex 2
-  timetravel.rb ch2.tex 2
-  pdflatex book
-  ...
+    timetravel.rb book.tex 1
+    timetravel.rb ch1.tex 1
+    timetravel.rb ch2.tex 1
+    pdflatex book
+    timetravel.rb book.tex 2
+    timetravel.rb ch1.tex 2
+    timetravel.rb ch2.tex 2
+    pdflatex book
+    ...
+
+This software is (c) 2016 by B. Crowell, GPL v2 license.
