@@ -49,6 +49,8 @@ the float lands on the intended page. Over the first few compilations,
 the float may jump around. It should normally converge to a definite
 result after compiling the document three times. Compiling a fourth or
 subsequent times should not cause floats to move to different pages.
+You can see how the process of iteration worked out by looking at the
+file(s) timetravel/*.log.
 
 Limitations and options
 =======================
@@ -59,7 +61,7 @@ the float on the very first page of the output.
 The auto option causes every paragraph break after \timetravelenable
 to be a possible place for the time-traveling material to arrive.
 This option may be unreliable, because it's an error if the material
-arrives somwehere that's not in outer paragraph mode. The package
+arrives somewhere that's not in outer paragraph mode. The package
 attempts to detect this, but detection may not be reliable. It may be
 safer to turn off the auto option. In this case, time-traveling
 material can only arrive at locations that are explicitly marked with
